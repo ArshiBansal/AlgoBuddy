@@ -1,6 +1,8 @@
 "use client";
-import React from "react";
-import { useState } from "react";
+
+import React, { useState } from "react";
+import Link from "next/link";
+
 import PrivacyPolicyModal from "@/app/components/PrivacyPolicyModal";
 import TermsOfServiceModal from "@/app/components/termsOfServicesModal";
 import CookiePolicyModal from "@/app/components/cookie";
@@ -24,9 +26,12 @@ const Footer = () => {
           algorithms.
         </p>
 
+        {/* Social Links */}
         <div className="flex items-center gap-4">
           <a
             href="https://github.com/PankajSingh34"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="GitHub"
             className="w-10 h-10 rounded-full border border-udemy-dark-border flex items-center justify-center text-udemy-dark-muted hover:text-udemy-dark-text hover:border-udemy-dark-text transition-colors focus-ring"
           >
@@ -41,6 +46,8 @@ const Footer = () => {
 
           <a
             href="https://www.linkedin.com/in/pankaj-singh-2a968b212/"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="LinkedIn"
             className="w-10 h-10 rounded-full border border-udemy-dark-border flex items-center justify-center text-udemy-dark-muted hover:text-udemy-dark-text hover:border-udemy-dark-text transition-colors focus-ring"
           >
@@ -72,11 +79,13 @@ const Footer = () => {
 
         <div className="w-full border-t border-udemy-dark-surface" />
 
+        {/* Footer Bottom */}
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-xs text-udemy-dark-muted w-full justify-between">
           <span>
             &copy; {new Date().getFullYear()} AlgoBuddy. All rights reserved.
           </span>
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-4 flex-wrap justify-center">
             <button
               onClick={() => setShowPolicyModal(true)}
               aria-label="Privacy Policy"
@@ -84,6 +93,7 @@ const Footer = () => {
             >
               Privacy Policy
             </button>
+
             <button
               onClick={() => setShowTermsModal(true)}
               aria-label="Terms of Service"
@@ -91,6 +101,7 @@ const Footer = () => {
             >
               Terms
             </button>
+
             <button
               onClick={() => setShowCookieModal(true)}
               aria-label="Cookie Policy"
@@ -98,6 +109,14 @@ const Footer = () => {
             >
               Cookies
             </button>
+
+            <Link
+              href="/contactus"
+              aria-label="Contact Us"
+              className="hover:text-primary transition focus-ring"
+            >
+              Contact Us
+            </Link>
           </div>
         </div>
       </div>
@@ -107,10 +126,12 @@ const Footer = () => {
         isOpen={showPolicyModal}
         onClose={() => setShowPolicyModal(false)}
       />
+
       <TermsOfServiceModal
         isOpen={showTermsModal}
         onClose={() => setShowTermsModal(false)}
       />
+
       <CookiePolicyModal
         isOpen={showCookieModal}
         onClose={() => setShowCookieModal(false)}
