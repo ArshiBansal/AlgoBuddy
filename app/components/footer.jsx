@@ -29,10 +29,13 @@ const Footer = () => {
         {/* Social Links */}
         <div className="flex items-center gap-4">
           <a
+            
             href="https://github.com/PankajSingh34"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-10 h-10 rounded-full border border-udemy-dark-border flex items-center justify-center text-udemy-dark-muted hover:text-udemy-dark-text hover:border-udemy-dark-text transition-colors focus-ring"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -49,6 +52,8 @@ const Footer = () => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="LinkedIn"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-10 h-10 rounded-full border border-udemy-dark-border flex items-center justify-center text-udemy-dark-muted hover:text-udemy-dark-text hover:border-udemy-dark-text transition-colors focus-ring"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

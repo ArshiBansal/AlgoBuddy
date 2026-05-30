@@ -67,19 +67,21 @@ export default function Page() {
         <ExploreOther
           title="Explore Sorting Algorithms"
           links={[
-            {
-              text: "Selection Sort",
-              url: "/visualizer/sorting/selectionsort",
-            },
-            {
-              text: "Insertion Sort",
-              url: "/visualizer/sorting/insertionsort",
-            },
-            { text: "Merge Sort", url: "/visualizer/sorting/mergesort" },
-            { text: "Quick Sort", url: "/visualizer/sorting/quicksort" },
-            { text: "Counting Sort", url: "/visualizer/sorting/countingsort" },
-            { text: "Heap Sort", url: "/algorithms/sorting/heap" },
-          ]}
+  { text: "Bubble Sort", url: "/visualizer/sorting/bubblesort" }, // ADD THIS
+  {
+    text: "Selection Sort",
+    url: "/visualizer/sorting/selectionsort",
+  },
+  {
+    text: "Insertion Sort",
+    url: "/visualizer/sorting/insertionsort",
+  },
+  { text: "Merge Sort", url: "/visualizer/sorting/mergesort" },
+  { text: "Quick Sort", url: "/visualizer/sorting/quicksort" },
+  { text: "Comparison Mode", url: "/visualizer/sorting/comparison" },
+  { text: "Counting Sort", url: "/visualizer/sorting/countingsort" },
+  { text: "Heap Sort", url: "/visualizer/sorting/heapsort" },
+]}
         />
       }
     />
