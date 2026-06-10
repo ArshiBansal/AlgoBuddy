@@ -14,7 +14,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 const storeUrl = pathToFileURL(
-  path.join(__dirname, "..", "lib", "collaboration", "sessionStore.js"),
+  path.join(__dirname, "..", "src", "lib", "collaboration", "sessionStore.js"),
 ).href;
 
 async function loadStore() {
@@ -80,6 +80,7 @@ test("listCollaborationSessions returns only discoverable fields", async () => {
     "createdAt",
     "updatedAt",
     "participantCount",
+    "presenterId",
   ]);
 
   for (const session of sessions) {
