@@ -10,14 +10,14 @@ import com.algobuddy.backend.repository.UserArenaProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +32,7 @@ public class ArenaService {
 
     private final UserArenaProfileRepository profileRepository;
     private final ArenaMatchRepository matchRepository;
+    private final CacheManager cacheManager;
 
     private void checkMatchResultRateLimit(UUID userId) {
         LocalDateTime since = LocalDateTime.now().minusMinutes(1);
@@ -139,10 +140,23 @@ public class ArenaService {
                 .build();
     }
 
+    private void checkInitMatchRateLimit(UUID userId) {
+        LocalDateTime since = LocalDateTime.now().minusMinutes(1);
+        long recentCount = matchRepository.countRecentInitiationsByUserId(userId, since);
+        if (recentCount >= 5) {
+            throw new IllegalStateException("Rate limit exceeded. Max 5 match initiations per minute.");
+        }
+    }
+
     @Transactional
     public void initMatch(UUID requestingUserId, com.algobuddy.backend.dto.InitMatchRequest request) {
         if (request.getMatchId() == null || request.getMatchId().isEmpty()) {
             throw new IllegalArgumentException("matchId is required");
+        }
+
+        checkInitMatchRateLimit(requestingUserId);
+        if (request.getOpponentId().equals(requestingUserId)) {
+            throw new IllegalArgumentException("Cannot initiate a match against yourself");
         }
 
         if (matchRepository.findByMatchId(request.getMatchId()).isPresent()) {
@@ -156,17 +170,23 @@ public class ArenaService {
                 .topic(request.getTopic() != null ? request.getTopic() : "Arrays")
                 .difficulty(request.getDifficulty() != null ? request.getDifficulty() : "Easy")
                 .startTime(java.time.LocalDateTime.now())
+                .status(ArenaMatch.MatchStatus.PENDING)
                 .build();
 
         matchRepository.save(match);
     }
 
+    @Scheduled(fixedRate = 300_000)
     @Transactional
-    @Caching(evict = {
-        @CacheEvict(value = "arenaProfile", key = "#requestingUserId"),
-        @CacheEvict(value = "arenaProfile", key = "#request.opponentId"),
-        @CacheEvict(value = "arenaLeaderboard", allEntries = true)
-    })
+    public void expireStaleMatches() {
+        LocalDateTime cutoff = LocalDateTime.now().minusHours(1);
+        int expired = matchRepository.expireStaleMatches(cutoff, ArenaMatch.MatchStatus.EXPIRED);
+        if (expired > 0) {
+            log.info("Expired {} stale arena matches older than {}", expired, cutoff);
+        }
+    }
+
+    @Transactional
     public void recordMatchResult(UUID requestingUserId, com.algobuddy.backend.dto.RecordMatchRequest request) {
         checkMatchResultRateLimit(requestingUserId);
 
@@ -183,10 +203,12 @@ public class ArenaService {
             throw new SecurityException("User is not a participant in this match");
         }
 
-        UUID opponentId = request.getOpponentId();
-        if (!existingMatch.getPlayer1Id().equals(opponentId) &&
-            !existingMatch.getPlayer2Id().equals(opponentId)) {
-            throw new SecurityException("Opponent is not a participant in this match");
+        // Derive opponent from match record, not from client input
+        UUID opponentId;
+        if (existingMatch.getPlayer1Id().equals(requestingUserId)) {
+            opponentId = existingMatch.getPlayer2Id();
+        } else {
+            opponentId = existingMatch.getPlayer1Id();
         }
 
         if (existingMatch.getWinnerId() != null) {
@@ -235,7 +257,12 @@ public class ArenaService {
 
                 existingMatch.setWinnerId(isWinner ? requestingUserId : opponentId);
                 existingMatch.setEndTime(java.time.LocalDateTime.now());
+                existingMatch.setStatus(ArenaMatch.MatchStatus.COMPLETED);
                 matchRepository.save(existingMatch);
+
+                cacheManager.getCache("arenaProfile").evict(requestingUserId);
+                cacheManager.getCache("arenaProfile").evict(opponentId);
+                cacheManager.getCache("arenaLeaderboard").clear();
 
                 return;
             } catch (ObjectOptimisticLockingFailureException | DataIntegrityViolationException e) {

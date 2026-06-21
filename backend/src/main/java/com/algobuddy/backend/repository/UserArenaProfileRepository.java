@@ -53,10 +53,16 @@ public interface UserArenaProfileRepository extends JpaRepository<UserArenaProfi
     Optional<ArenaLeaderboardProjection> findProfileWithUserDetails(@Param("userId") UUID userId);
 
     @Query(value = """
-            SELECT rank FROM (
-                SELECT user_id, RANK() OVER (ORDER BY rating DESC, xp DESC) as rank
+            SELECT COUNT(p.user_id) + 1
+            FROM user_arena_profiles p
+            CROSS JOIN (
+                SELECT rating, xp
                 FROM user_arena_profiles
-            ) ranked WHERE user_id = :userId
+                WHERE user_id = :userId
+            ) u
+            WHERE p.rating > u.rating
+               OR (p.rating = u.rating AND p.xp > u.xp)
             """, nativeQuery = true)
     Integer findRankByUserId(@Param("userId") UUID userId);
+
 }

@@ -5,7 +5,20 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@/features/user/UserContext";
 import { supabase } from "@/lib/supabase";
-import { Search, Moon, Sun, Menu, X, ChevronDown, Swords, LogOut, User, LayoutDashboard } from "lucide-react";
+import {
+  Search,
+  Moon,
+  Sun,
+  Menu,
+  X,
+  ChevronDown,
+  Swords,
+  LogOut,
+  Bell,
+  User,
+  LayoutDashboard,
+} from "lucide-react";
+
 import { NAV_LINKS } from "./navLinks";
 import NotificationDropdown from "./notifications/NotificationDropdown";
 import ProfileProgress from "./ui/ProfileProgress";
@@ -105,6 +118,7 @@ export default function Navbar() {
     const handleEscape = (e) => {
       if (e.key === "Escape") {
         setMenuOpen(false);
+        setUserMenuOpen(false);
       }
     };
 
@@ -160,9 +174,8 @@ export default function Navbar() {
       localStorage.removeItem("algobuddy_last_active_date");
       localStorage.removeItem("PROBLEM_BOOKMARKS");
     }
-    router.push("/");
-    window.location.href = "/";
     setMenuOpen(false);
+    window.location.href = "/";
   };
 
   const isActive = (href) => {

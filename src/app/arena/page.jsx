@@ -149,14 +149,11 @@ export default function ArenaPage() {
   }, []);
 
   const todaysChallenge = useMemo(() => {
-    const unsolvedProblems = allProblems.filter(
-      (problem) => getStatus(problem.id) !== "Completed"
-    );
+    if (allProblems.length === 0) return null;
 
-    if (unsolvedProblems.length === 0) return null;
-
-    const today = new Date().getDate();
-    const problem = unsolvedProblems[today % unsolvedProblems.length];
+    const daySeed = Math.floor(new Date().setHours(0,0,0,0) / 86400000);
+    const problem = allProblems[daySeed % allProblems.length];
+    if (!problem) return null;
     
     return {
       title: problem.name,
@@ -165,7 +162,7 @@ export default function ArenaPage() {
       xpAward: problem.difficulty === "Easy" ? 100 : problem.difficulty === "Medium" ? 250 : 500,
       practiceUrl: problem.practiceUrl
     };
-  }, [allProblems, progress, getStatus]);
+  }, [allProblems]);
 
 
   const ensureLoggedIn = () => {
@@ -273,7 +270,7 @@ export default function ArenaPage() {
 }, [showXPWidget]);
 
   const [currentUserStats, setCurrentUserStats] = useState({
-    name: "Pankaj Singh",
+    name: "",
     level: 1,
     rating: 1200,
     xp: 0,
@@ -467,12 +464,12 @@ export default function ArenaPage() {
                           </div>
                         ) : (
                           <div className="w-full h-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light flex items-center justify-center text-xs font-bold">
-                            {(currentUserStats.name || "Pankaj").split(" ")[0].substring(0,2).toUpperCase()}
+                            {(currentUserStats.name || "You").split(" ")[0].substring(0,2).toUpperCase()}
                           </div>
                         )}
                       </div>
                       <span className="text-[10px] text-slate-300 block font-semibold mb-1 truncate max-w-[64px]">
-                        {leaderboard[1] ? (leaderboard[1]?.name || `User ${leaderboard[1]?.userId.substring(0,4)}`) : (currentUserStats.name || "Pankaj").split(" ")[0]}
+                        {leaderboard[1] ? (leaderboard[1]?.name || `User ${leaderboard[1]?.userId.substring(0,4)}`) : (currentUserStats.name || "You").split(" ")[0]}
                       </span>
                       <span className="text-[9px] text-slate-400 block mb-2">{leaderboard[1] ? leaderboard[1].xp : currentUserStats.xp || 2320} XP</span>
                       <div className="w-14 h-12 bg-slate-800 border-t border-slate-700 rounded-t-lg flex items-center justify-center font-bold text-slate-400 shadow-lg text-lg">
